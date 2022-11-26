@@ -32,6 +32,12 @@ func (nc *AgentController) Initialize(RouteRegistry registry.RouterRegistry) {
 		nc.join,
 	)
 	RouteRegistry.AddRestricted(
+		BASE_PATH+"/{service-identifier}/containers",
+		[]string{""},
+		"GET",
+		nc.containers,
+	)
+	RouteRegistry.AddRestricted(
 		BASE_PATH+"/leave",
 		[]string{"nodes.remove"},
 		"PUT",
@@ -62,5 +68,14 @@ func (ac *AgentController) leave(w http.ResponseWriter, r *http.Request) {
 		ac.ServiceFailure(w, err)
 	} else {
 		ac.OKNoResponse(w)
+	}
+}
+
+func (ac *AgentController) containers(w http.ResponseWriter, r *http.Request) {
+	serviceIdentifier := ac.GetVar("service-identifier", r)
+	if results, err := ac.service.ServiceContainers(serviceIdentifier); err != nil {
+		ac.ServiceFailure(w, err)
+	} else {
+		ac.OK(w, results)
 	}
 }
