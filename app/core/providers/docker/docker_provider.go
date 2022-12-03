@@ -4,12 +4,11 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strings"
+	"os/exec"
 	"time"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
-	"github.com/docker/docker/api/types/swarm"
 	"github.com/docker/docker/client"
 	"github.com/space-fold-technologies/aurora-agent/app/core/logging"
 	"github.com/space-fold-technologies/aurora-agent/app/core/providers"
@@ -74,24 +73,30 @@ func (dp *DockerProvider) ServiceContainers(identifier string) ([]*providers.Con
 func (dp *DockerProvider) join(ctx context.Context, captainIP, token string, retries *int) error {
 	logger := logging.GetInstance()
 	logger.Infof("WORKER TOKEN: %s WORKER IP: %s CAPTAIN IP: %s", token, dp.advertiseAddr, captainIP)
-
-	if err := dp.dkr.SwarmJoin(ctx, swarm.JoinRequest{
-		ListenAddr:    fmt.Sprintf("%s:2377", dp.listenAddr),
-		AdvertiseAddr: fmt.Sprintf("%s:2377", dp.advertiseAddr),
-		RemoteAddrs:   []string{fmt.Sprintf("%s:2377", captainIP)},
-		DataPathAddr:  dp.advertiseAddr,
-		JoinToken:     token,
-		Availability:  swarm.NodeAvailabilityActive,
-	}); err != nil {
-		if strings.Contains(err.Error(), "This node is already part of a swarm") {
-			logger.Infof("Probably a retry call from: %s", captainIP)
-			return nil
-		} else if strings.Contains(strings.ToLower(err.Error()), "could not find worker node on time") && *retries < MAX_RETRIES {
-			*retries++
-			return dp.join(ctx, captainIP, token, retries)
-		}
+	cmd := fmt.Sprintf("docker swarm join --token %s %s:2377", token, captainIP)
+	if _, err := exec.Command(cmd).Output(); err != nil {
 		return err
 	}
+	//TODO: Closing off this section of the code in favor of using the cli command for correct network set up
+	/*
+		if err := dp.dkr.SwarmJoin(ctx, swarm.JoinRequest{
+			ListenAddr:    fmt.Sprintf("%s:2377", dp.listenAddr),
+			AdvertiseAddr: fmt.Sprintf("%s:2377", dp.advertiseAddr),
+			RemoteAddrs:   []string{fmt.Sprintf("%s:2377", captainIP)},
+			DataPathAddr:  dp.advertiseAddr,
+			JoinToken:     token,
+			Availability:  swarm.NodeAvailabilityActive,
+		}); err != nil {
+			if strings.Contains(err.Error(), "This node is already part of a swarm") {
+				logger.Infof("Probably a retry call from: %s", captainIP)
+				return nil
+			} else if strings.Contains(strings.ToLower(err.Error()), "could not find worker node on time") && *retries < MAX_RETRIES {
+				*retries++
+				return dp.join(ctx, captainIP, token, retries)
+			}
+			return err
+		}
+	*/
 	return nil
 }
 
