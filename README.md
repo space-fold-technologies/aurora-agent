@@ -19,7 +19,7 @@ at the request of the `aurora-daemon` running on the master node. \
 
 ## Installation and Setup ##
 
-#### Pre-requisites ####
+### Pre-requisites ###
 
 - Linux system or WSL-2 with golang 1.19.X to compile the code
 - Debian Linux or any linux environment with docker and docker swarm installed and systemctl
