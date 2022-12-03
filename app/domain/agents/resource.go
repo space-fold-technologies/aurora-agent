@@ -72,8 +72,8 @@ func (ac *AgentController) leave(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ac *AgentController) containers(w http.ResponseWriter, r *http.Request) {
-	name := ac.GetVar("service-name", r)
-	if results, err := ac.service.ServiceContainers(name); err != nil {
+	identifier := ac.GetVar("service-identifier", r)
+	if results, err := ac.service.ServiceContainers(identifier); err != nil {
 		ac.ServiceFailure(w, err)
 	} else {
 		ac.OK(w, results)
