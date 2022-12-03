@@ -74,7 +74,7 @@ func (dp *DockerProvider) join(ctx context.Context, captainIP, token string, ret
 	logger := logging.GetInstance()
 	logger.Infof("WORKER TOKEN: %s WORKER IP: %s CAPTAIN IP: %s", token, dp.advertiseAddr, captainIP)
 	cmd := fmt.Sprintf("docker swarm join --token %s %s:2377", token, captainIP)
-	if _, err := exec.Command(cmd).Output(); err != nil {
+	if _, err := exec.Command("/bin/sh", "-c", cmd).Output(); err != nil {
 		return err
 	}
 	//TODO: Closing off this section of the code in favor of using the cli command for correct network set up
