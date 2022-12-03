@@ -100,23 +100,23 @@ func (dp *DockerProvider) join(ctx context.Context, captainIP, token string, ret
 	return nil
 }
 
-func (dp *DockerProvider) queryContainers(ctx context.Context, identifier string, retries *int) ([]*providers.ContainerDetails, error) {
+func (dp *DockerProvider) queryContainers(ctx context.Context, name string, retries *int) ([]*providers.ContainerDetails, error) {
 	details := make([]*providers.ContainerDetails, 0)
 	filter := filters.NewArgs()
-	filter.Add("label", fmt.Sprintf("com.docker.swarm.service.id=%s", identifier))
+	filter.Add("label", fmt.Sprintf("com.docker.swarm.service.id=%s", name))
 	if containers, err := dp.dkr.ContainerList(ctx, types.ContainerListOptions{Filters: filter}); err != nil {
 		return nil, err
 	} else if len(containers) == 0 && *retries < MAX_RETRIES {
 		time.Sleep(5 * time.Second)
 		*retries++
-		return dp.queryContainers(ctx, identifier, retries)
+		return dp.queryContainers(ctx, name, retries)
 	} else {
 		for _, container := range containers {
 			details = append(details, &providers.ContainerDetails{
 				ID:            container.ID,
 				NodeID:        container.Labels["com.docker.swarm.node.id"],
 				TaskID:        container.Labels["com.docker.swarm.task.id"],
-				ServiceID:     identifier,
+				ServiceID:     container.Labels["com.docker.swarm.service.id"],
 				IPAddress:     container.NetworkSettings.Networks["aurora-default"].IPAddress,
 				AddressFamily: 4,
 			})

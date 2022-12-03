@@ -32,7 +32,7 @@ func (nc *AgentController) Initialize(RouteRegistry registry.RouterRegistry) {
 		nc.join,
 	)
 	RouteRegistry.Add(
-		BASE_PATH+"/{service-identifier}/containers",
+		BASE_PATH+"/{service-name}/containers",
 		false,
 		"GET",
 		nc.containers,
@@ -72,8 +72,8 @@ func (ac *AgentController) leave(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ac *AgentController) containers(w http.ResponseWriter, r *http.Request) {
-	serviceIdentifier := ac.GetVar("service-identifier", r)
-	if results, err := ac.service.ServiceContainers(serviceIdentifier); err != nil {
+	name := ac.GetVar("service-name", r)
+	if results, err := ac.service.ServiceContainers(name); err != nil {
 		ac.ServiceFailure(w, err)
 	} else {
 		ac.OK(w, results)

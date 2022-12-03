@@ -24,8 +24,8 @@ func (as *AgentService) Remove(order *RemoveAgent) error {
 	return as.provider.Leave(&providers.LeaveOrder{ID: order.GetId()})
 }
 
-func (as *AgentService) ServiceContainers(identifier string) (*ContainerReport, error) {
-	if containers, err := as.provider.ServiceContainers(identifier); err != nil {
+func (as *AgentService) ServiceContainers(name string) (*ContainerReport, error) {
+	if containers, err := as.provider.ServiceContainers(name); err != nil {
 		return nil, err
 	} else {
 		report := &ContainerReport{Containers: make([]*ContainerReport_Container, 0)}
