@@ -27,7 +27,7 @@ at the request of the `aurora-daemon` running on the master node. \
 
 #### STEPS ####
 
-Edit the contents of in `resources/settings.yml` substituting what is required
+Edit the contents of in `resources/settings.yml` substituting what is required and copy this to the `etc/aurora` directory
 
 ```yaml
 provider: DOCKER-SWARM
@@ -37,6 +37,11 @@ advertise-address: ${SECURED-IP-ADDRESS-HERE}
 host: 0.0.0.0
 port: 2700
 ```
+
+#### NB ####
+
+Alternatively, if you would like your configuration to be embedded into the binary then you can leave the changes in \
+`resources/settings.yml` then you can compile it and run without the config path flag.
 
 On a computer with the desired golang compiler for the target architecture running linux , you can compile the golang source code by running `./full_build.sh`
 This might be x86_64, RISC-V, or ARM-64.
@@ -74,7 +79,7 @@ Add the following lines
     Type=simple
     User=aurora
     Group=aurora
-    ExecStart=/usr/local/bin/aurora-agent --mode=run
+    ExecStart=/usr/local/bin/aurora-agent --mode=run --config=/etc/aurora/config.yml
     ExecReload=/bin/kill -HUP $MAINPID
     KillSignal=SIGINT
     TimeoutStopSec=5
