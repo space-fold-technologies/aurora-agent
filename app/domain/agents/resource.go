@@ -31,9 +31,9 @@ func (nc *AgentController) Initialize(RouteRegistry registry.RouterRegistry) {
 		"PUT",
 		nc.join,
 	)
-	RouteRegistry.AddRestricted(
+	RouteRegistry.Add(
 		BASE_PATH+"/{service-identifier}/containers",
-		[]string{""},
+		false,
 		"GET",
 		nc.containers,
 	)
