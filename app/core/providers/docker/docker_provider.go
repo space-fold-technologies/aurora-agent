@@ -63,6 +63,9 @@ func (dp *DockerProvider) ServiceContainers(identifier string) ([]*providers.Con
 	ctx := context.Background()
 	defer ctx.Done()
 	retries := 0
+	if len(identifier) == 0 {
+		return nil, fmt.Errorf("there is no valid identifier to query")
+	}
 	if containers, err := dp.queryContainers(ctx, identifier, &retries); err != nil {
 		return nil, err
 	} else {
@@ -101,6 +104,8 @@ func (dp *DockerProvider) join(ctx context.Context, captainIP, token string, ret
 }
 
 func (dp *DockerProvider) queryContainers(ctx context.Context, identifier string, retries *int) ([]*providers.ContainerDetails, error) {
+	logger := logging.GetInstance()
+	logger.Infof("container query attempt ::[%d] for service-id ::[%s]", *retries, identifier)
 	details := make([]*providers.ContainerDetails, 0)
 	filter := filters.NewArgs()
 	filter.Add("label", fmt.Sprintf("com.docker.swarm.service.id=%s", identifier))
@@ -110,6 +115,8 @@ func (dp *DockerProvider) queryContainers(ctx context.Context, identifier string
 		time.Sleep(5 * time.Second)
 		*retries++
 		return dp.queryContainers(ctx, identifier, retries)
+	} else if *retries >= MAX_RETRIES {
+		return nil, fmt.Errorf("no containers could be found matching service id ::[%s]", identifier)
 	} else {
 		for _, container := range containers {
 			details = append(details, &providers.ContainerDetails{
