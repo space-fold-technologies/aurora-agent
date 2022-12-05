@@ -1,2 +1,3 @@
 aurora-agent
 *.tar.gz
+local_package.sh

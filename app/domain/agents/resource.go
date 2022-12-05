@@ -32,7 +32,7 @@ func (nc *AgentController) Initialize(RouteRegistry registry.RouterRegistry) {
 		nc.join,
 	)
 	RouteRegistry.Add(
-		BASE_PATH+"/{service-name}/containers",
+		BASE_PATH+"/{service-identifier}/containers",
 		false,
 		"GET",
 		nc.containers,
